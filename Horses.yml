@@ -357,6 +357,22 @@ HorsesSetJump:
     - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
     # Notify Player
     - narrate "<def[prefix]> You have now set this horse's jump strength to <&dq><def[jump_strength]><&dq>." targets:<player>
+    
+HorsesDelete:
+    type: task
+    debug: false
+    script:
+    # Get Owner & Name before Deletion
+    - define name <yaml[horses].read[entities.<player.vehicle>.name]>
+    - define owner <yaml[horses].read[entities.<player.vehicle>.owner]>
+    # Delete Horse from YAML
+    - yaml id:horses set entities.<player.vehicle>:!
+    # Remove Horse from Server
+    - remove <player.vehicle>
+    # Notify Remover & Owner if Different
+    - narrate "<def[prefix]> You successfully deleted the horse." targets:<player>
+    - if <player> != <def[owner]>:
+        - narrate "<def[prefix]> Your horse <&dq><def[name]><&dq> has been permanently deleted." targets:<def[owner].as_player>
 
 HorsesCommand:
     type: command
@@ -587,7 +603,12 @@ HorsesCommand:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[1]> == "DELETE":
                         - if <player.has_permission[horses.admin.delete]>:
-                        
+                            # Check Riding Horse
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                # Delete Horse
+                                - inject HorsesDelete
+                            - else:
+                                - "<def[prefix]> You must be riding a horse to use that command." targets:<player>
                         - else:
                             - narrate <def[permission_error]> targets:<player>
                     - else:

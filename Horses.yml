@@ -237,8 +237,14 @@ HorsesEvents:
             - if <yaml[horses].read[entities.<context.entity>.damage]> == true:
                 - inject HorsesDamaged
         on horse breeds:
-        - define horse <context.child>
-        - inject HorsesCreation
+        - if <yaml[horses].read[entities.<context.father>.gender]||null> == MALE && <yaml[horses].read[entities.<context.mother>.gender]||null> == FEMALE:
+            - define horse <context.child>
+            - inject HorsesCreation
+        - else if <yaml[horses].read[entities.<context.mother>.gender]||null> == MALE && <yaml[horses].read[entities.<context.father>.gender]||null> == FEMALE:
+            - define horse <context.child>
+            - inject HorsesCreation
+        - else:
+            - determine cancelled
         on horse dies:
         - if <yaml[horses].contains[entities.<context.entity>]>:
             - inject HorsesRemoval

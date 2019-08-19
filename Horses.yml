@@ -301,6 +301,10 @@ HorsesTrust:
     - yaml id:horses set entities.<player.vehicle>.trusted:<yaml[horses].read[entities.<player.vehicle>.trusted].as_list.include[<def[player]>]>
     # Save Horse
     - yaml savefile:data/entities/horses.yml id:horses
+    # Notify Player
+    - narrate "<def[prefix]> You have now allowed <&dq><def[player].as_player.name><&dq> to ride your horse." targets:<player>
+    # Notify Trusted Player
+    - narrate "<def[prefix]> You are now allowed to ride <&dq><player.vehicle.name><&dq>." targets:<def[player].as_player>
 HorsesUntrust:
     type: task
     debug: false
@@ -309,6 +313,10 @@ HorsesUntrust:
     - yaml id:horses set entities.<player.vehicle>.trusted:<yaml[horses].read[entities.<player.vehicle>.trusted].as_list.exclude[<def[player]>]>
     # Save Horse
     - yaml savefile:data/entities/horses.yml id:horses
+    # Notify Player
+    - narrate "<def[prefix]> You have now stopped <&dq><def[player].as_player.name><&dq> from being able to ride your horse." targets:<player>
+    # Notify Trusted Player
+    - narrate "<def[prefix]> You are no longer allowed to ride <&dq><player.vehicle.name><&dq>." targets:<def[player].as_player>
 
 HorsesRename:
     type: task

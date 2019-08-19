@@ -1,8 +1,8 @@
 HorseCrop:
     type: item
     debug: false
-    material: i@DIAMOND_PICKAXE[unbreakable=true;flags=HIDE_UNBREAKABLE|HIDE_ATTRIBUTES]
-    durability: 1
+    material: i@WOODEN_AXE[unbreakable=true;flags=HIDE_UNBREAKABLE|HIDE_ATTRIBUTES]
+    custom_model_data: 1
     display name: "<&f>Horse Crop"
 
 HorsesPlayerInit:

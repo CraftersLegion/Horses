@@ -39,7 +39,7 @@ HorsesCreation:
     # Horse Appearance
     - define appearance li@<def[horse].color>
     - yaml id:horses set entities.<def[horse]>.color:<def[appearance].as_list.get[1]>
-    - yaml id:horses set entities.<def[horse]>.markings:<def[appearance].as_list.get[1]>
+    - yaml id:horses set entities.<def[horse]>.markings:<def[appearance].as_list.get[2]>
     # Horse Speed
     - yaml id:horses set entities.<def[horse]>.speed:<def[horse].speed>
     # Horse Jump
@@ -357,7 +357,7 @@ HorsesSetJump:
     - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
     # Notify Player
     - narrate "<def[prefix]> You have now set this horse's jump strength to <&dq><def[jump_strength]><&dq>." targets:<player>
-    
+
 HorsesDelete:
     type: task
     debug: false
@@ -615,7 +615,7 @@ HorsesCommand:
                         - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help." targets:<player>
                     - else:
                         - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help." targets:<player>
-                        
+
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
         - else:

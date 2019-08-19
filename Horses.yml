@@ -317,7 +317,6 @@ HorsesUntrust:
     - narrate "<def[prefix]> You have now stopped <&dq><def[player].as_player.name><&dq> from being able to ride your horse." targets:<player>
     # Notify Trusted Player
     - narrate "<def[prefix]> You are no longer allowed to ride <&dq><player.vehicle.name><&dq>." targets:<def[player].as_player>
-
 HorsesRename:
     type: task
     debug: false
@@ -413,19 +412,19 @@ HorsesCommand:
             - else if <context.args.get[1]> == "RENAME":
                 - if <player.has_permission[horses.rename]>:
                   # Check Player Riding Horse
-                	- if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                    - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
                     # Check if Horse Belongs to Player
-                		- if <yaml[horses].read[entities.<player.vehicle>.owner]||null> == <player>:
+                        - if <yaml[horses].read[entities.<player.vehicle>.owner]||null> == <player>:
                       # Check if Horse Name Specified
-                			- if <context.args.get[2]||null> != null:
+                            - if <context.args.get[2]||null> != null:
                         # Rename Horse
-                				- inject HorsesRename
-                			- else:
-                				- narrate "<def[prefix]> You must specify a name for your horse to rename. Usage: /horse rename <&lt>name<&gt>" targets:<player>
-                		- else:
-                			- narrate "<def[prefix]> This horse does not belong to you." targets:<player>
-                	- else:
-                		- narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - inject HorsesRename
+                            - else:
+                                - narrate "<def[prefix]> You must specify a name for your horse to rename. Usage: /horse rename <&lt>name<&gt>" targets:<player>
+                        - else:
+                            - narrate "<def[prefix]> This horse does not belong to you." targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "LIST":
@@ -570,13 +569,17 @@ HorsesCommand:
 
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[1]> == "DELETE":
+                        - if <player.has_permission[horses.admin.delete]>:
+                        
+                        - else:
+                            - narrate <def[permission_error]> targets:<player>
                     - else:
                         - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help." targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help." targets:<player>
+                        
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
-            - else if <context.args.get[1]> == "DELETE":
-
-            - else:
-                - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help."
         - else:
-            - narrate "<def[prefix]> No Argument Specified. Type <&dq>/horses help<&dq> for help."
+            - narrate "<def[prefix]> No Argument Specified. Type <&dq>/horses help<&dq> for help." targets:<player>

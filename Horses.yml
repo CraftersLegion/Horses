@@ -253,10 +253,14 @@ HorsesEvents:
         on player exits horse:
         - inject HorsesExit
         on player left clicks with HorseCrop:
+        # Usage Durability Change
+        - adjust <context.item> "durability:<context.item.durability.sub[1]>"
         # Check Player Riding Horse
         - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
             - inject HorsesSpeedDecrease
         on player right clicks with HorseCrop:
+        # Usage Durability Change
+        - adjust <context.item> "durability:<context.item.durability.sub[1]>"
         # Check Player Riding Horse
         - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
             - inject HorsesSpeedIncrease

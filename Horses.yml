@@ -237,10 +237,11 @@ HorsesEvents:
             - if <yaml[horses].read[entities.<context.entity>.damage]> == true:
                 - inject HorsesDamaged
         on horse breeds:
-        - define horse <context.child>
         - if <yaml[horses].read[entities.<context.father>.gender]||null> == MALE && <yaml[horses].read[entities.<context.mother>.gender]||null> == FEMALE:
+            - define horse <context.child>
             - inject HorsesCreation
         - else if <yaml[horses].read[entities.<context.mother>.gender]||null> == MALE && <yaml[horses].read[entities.<context.father>.gender]||null> == FEMALE:
+            - define horse <context.child>
             - inject HorsesCreation
         - else:
             - determine cancelled
@@ -330,6 +331,8 @@ HorsesRename:
     - yaml id:horses set entities.<player.vehicle>.name:<context.args.get[2]>
     - adjust <player.vehicle> "custom_name:<context.args.get[2]>"
     - adjust <player.vehicle> "custom_name_visible:true"
+    # Notify Player
+    - narrate "<def[prefix]> Your horse's name is now <&dq><context.args.get[2]><&dq>." targets:<player>
 
 HorsesSetSpeed:
     type: task
@@ -338,6 +341,8 @@ HorsesSetSpeed:
     # Sets the speed of a horse
     - yaml id:horses set entities.<player.vehicle>.speed:<def[speed].as_decimal>
     - adjust <player.vehicle> "speed:<def[speed].as_decimal>"
+    # Notify Player
+    - narrate "<def[prefix]> You have now set this horse's speed to <&dq><def[speed]><&dq>." targets:<player>
 
 HorsesSetJump:
     type: task
@@ -346,6 +351,8 @@ HorsesSetJump:
     # Sets the jump strength of a horse
     - yaml id:horses set entities.<player.vehicle>.jump_strength:<def[jump_strength].as_decimal>
     - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
+    # Notify Player
+    - narrate "<def[prefix]> You have now set this horse's jump strength to <&dq><def[jump_strength]><&dq>." targets:<player>
 
 HorsesCommand:
     type: command

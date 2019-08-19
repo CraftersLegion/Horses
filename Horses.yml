@@ -1,0 +1,574 @@
+HorseCrop:
+    type: item
+    debug: false
+    material: i@DIAMOND_PICKAXE[unbreakable=true;flags=HIDE_UNBREAKABLE|HIDE_ATTRIBUTES]
+    durability: 1
+    display name: "<&f>Horse Crop"
+
+HorsesPlayerInit:
+    type: task
+    debug: false
+    script:
+    - if <yaml[<player>].read[horses.count]||null> == null:
+        - yaml id:<player> set horses.count:0
+
+    - foreach <yaml[horses].list_keys[entities]> as :horse:
+        - if <yaml[horses].read[entities.<def[horse]>.owner> == <player>:
+            - if <def[horse].is_spawned>:
+                - yaml id:horses set entities.<def[horse]>.spawned:true
+                - spawn horse save:horseEntity
+
+HorsesMasterInit:
+    type: task
+    debug: false
+    script:
+    # Create New File if Doesn't Exist
+    - if !<server.has_file[data/entities/horses.yml]>:
+        - yaml create id:horses
+        - yaml savefile:data/entities/horses.yml id:horses
+    # Load Old One If Already Exists
+    - else:
+        - yaml load:data/entities/horses.yml id:horses
+
+HorsesCreation:
+    type: task
+    debug: false
+    script:
+    # Horse Name
+    - yaml id:horses set entities.<def[horse]>.name:null
+    # Horse Appearance
+    - define appearance li@<def[horse].color>
+    - yaml id:horses set entities.<def[horse]>.color:<def[appearance].as_list.get[1]>
+    - yaml id:horses set entities.<def[horse]>.markings:<def[appearance].as_list.get[1]>
+    # Horse Speed
+    - yaml id:horses set entities.<def[horse]>.speed:<def[horse].speed>
+    # Horse Jump
+    - yaml id:horses set entities.<def[horse]>.jump_strength:<def[horse].jump_strength>
+    # Hunger
+    - yaml id:horses set entities.<def[horse]>.hunger:100
+    - yaml id:horses set entities.<def[horse]>.hungerEnabled:true
+    # Thirst
+    - yaml id:horses set entities.<def[horse]>.thirst:100
+    - yaml id:horses set entities.<def[horse]>.thirstEnabled:true
+    # Age
+    - yaml id:horses set entities.<def[horse]>.age.val:<def[horse].as_entity.age>
+    - yaml id:horses set entities.<def[horse]>.age.adulthood:0
+    - yaml id:horses set entities.<def[horse]>.age.enabled:true
+    # Health & Max Health
+    - yaml id:horses set entities.<def[horse]>.health:<def[horse].health>
+    - yaml id:horses set entities.<def[horse]>.max_health:<def[horse].health.max>
+    - yaml id:horses set entities.<def[horse]>.damage:true
+    # Call Distance
+    - yaml id:horses set entities.<def[horse]>.call_distance:16
+    # Parents
+    - if <context.father||null> != null:
+        - yaml id:horses set entities.<def[horse]>.father:<context.father>
+    - else:
+        - yaml id:horses set entities.<def[horse]>.father:null
+    - if <context.mother||null> != null:
+        - yaml id:horses set entities.<def[horse]>.mother:<context.mother>
+    - else:
+        - yaml id:horses set entities.<def[horse]>.mother:null
+    # First Owner & Owner
+    - yaml id:horses set entities.<def[horse]>.firstowner:null
+    - yaml id:horses set entities.<def[horse]>.lastowner:null
+    - yaml id:horses set entities.<def[horse]>.owner:null
+    # Trusted Players
+    - yaml id:horses set entities.<def[horse]>.trusted:li@
+    # Gender
+    - if <util.random.int[0].to[1]> == 0:
+        - yaml id:horses set entities.<def[horse]>.gender:FEMALE
+    - else:
+        - yaml id:horses set entities.<def[horse]>.gender:MALE
+    # Spawned
+    - yaml id:horses set entities.<def[horse]>.spawned:true
+    # Save Entity
+    - yaml savefile:data/entities/horses.yml id:horses
+
+HorsesDamaged:
+    type: task
+    debug: false
+    script:
+    # Update Health Levels
+    - yaml id:horses set entities.<context.entity>.health:<context.entity.health>
+    - yaml id:horses set entities.<context.entity>.max_health:<context.entity.health.max>
+    # Save Entity
+    - yaml savefile:data/entities/horses.yml id:horses
+
+HorsesRemoval:
+    type: task
+    debug: false
+    script:
+    # Remove Entity From Database
+    - yaml id:horses set entities.<context.entity>:!
+    # Save Entity
+    - yaml savefile:data/entities/horses.yml id:horses
+
+HorsesRiderCheck:
+    type: task
+    debug: false
+    script:
+    # Check if Rider Owner or Trusted or Admin
+    - if <yaml[horses].contains[entities.<context.vehicle>]>:
+        - if <yaml[horses].read[entities.<context.vehicle>.owner]||null> != <context.entity>:
+            - if !<yaml[horses].read[entities.<context.vehicle>.trusted].as_list.contains[<context.entity>]||null> == true:
+                - if !<player.has_permission[horses.admin.ride]:
+                  - determine cancelled
+
+    - inject HorsesEntry
+
+HorsesMasterLoop:
+    type: task
+    debug: false
+    script:
+    - flag server "horseLoop:true"
+    - while <server.flag[horseLoop]> == true:
+        - flag server "horseEntities:<yaml[horses].list_keys[entities]>"
+        - foreach <yaml[horses].list_keys[entities]> as:horse:
+
+            # Check YAML Changes
+            - if <server.flag[horseEntities]> != <yaml[horses].list_keys[entities]>:
+                - foreach stop
+                - flag server "horseLoop:false"
+                - flag server "horseEntities:<yaml[horses].list_keys[entities]>"
+                - inject HorseMasterLoop
+
+            - if <entities.<def[horse]>.is_spawned> == true:
+              # Horse Hunger/Feeding
+              - if <yaml[horses].read[entities.<def[horse]>.hungerEnabled]> == true:
+                  - yaml id:horses set entities.<def[horse]>.hunger:<yaml[horses].read[entities.<def[horse]>.hunger].as_decimal.sub[0.1]>
+              - if !<def[horse].as_entity.location.find.blocks[m@grass_block|m@hay_block].within[6].as_list.is_empty>:
+                  - if <yaml[horses].read[entities.<def[horse]>.hunger].as_decimal> < 0:
+                      - yaml id:horses set entities.<def[horse]>.hunger:0
+                  - define hungerValue <yaml[horses].read[entities.<def[horse]>.hunger].as_decimal.add[1.0]>
+                  - if <def[hungerValue]> > 100:
+                      - define hungerValue 100
+                  - yaml id:horses set entities.<def[horse]>.hunger:<def[hungerValue]>
+              - if <yaml[horses].read[entities.<def[horse]>.hunger]>  < 0:
+                  - hurt 2.0 <def[horse].as_entity>
+
+              # Horse Thrist
+              - if <yaml[horses].read[entities.<def[horse]>.thirstEnabled]> == true:
+                  - yaml id:horses set entities.<def[horse]>.thirst:<yaml[horses].read[entities.<def[horse]>.thirst].as_decimal.sub[0.1]>
+              - if !<def[horse].as_entity.location.find.blocks[m@water].within[6].as_list.is_empty>:
+                  - if <yaml[horses].read[entities.<def[horse]>.thirst].as_decimal> < 0:
+                      - yaml id:horses set entities.<def[horse]>.thirst:0
+                  - define thirstValue <yaml[horses].read[entities.<def[horse]>.hunger].as_decimal.add[1.0]>
+                  - if <def[thirstValue]> > 100:
+                      - define thirstValue 100
+                  - yaml id:horses set entities.<def[horse]>.hunger:<def[thirstValue]>
+              - if <yaml[horses].read[entities.<def[horse]>.thirst]> < 0:
+                  - hurt 1.0 <def[horse].as_entity>
+
+        # Save Horse Entities
+        - yaml savefile:data/entities/horses.yml id:horses
+
+        # Cooldown
+        - wait 1s
+
+HorsesEntry:
+    type: task
+    debug: false
+    script:
+    - flag <context.vehicle> "speed:0"
+    - adjust <context.vehicle> "speed:0"
+HorsesExit:
+    type: task
+    debug: false
+    script:
+    - flag <context.vehicle> "speed:0"
+    - adjust <context.vehicle> "speed:<yaml[horses].read[entities.<context.vehicle>.speed]>"
+
+HorsesSpeedIncrease:
+    type: task
+    debug: true
+    script:
+    - if <player.vehicle.flag[speed]> < 4:
+        - flag <player.vehicle> "speed:<player.vehicle.flag[speed].add[1]>"
+    - inject HorsesSpeedEvaluate
+HorsesSpeedDecrease:
+    type: task
+    debug: false
+    script:
+    - if <player.vehicle.flag[speed]> > 0:
+        - flag <player.vehicle> "speed:<player.vehicle.flag[speed].sub[1]>"
+    - inject HorsesSpeedEvaluate
+
+HorsesSpeedEvaluate:
+    type: task
+    debug: false
+    script:
+    - define speedVariable <yaml[horses].read[entities.<player.vehicle>.speed].as_decimal.div[4]>
+    - if <player.vehicle.flag[speed]> == 1:
+        - adjust <player.vehicle> "speed:<def[speedVariable]>"
+        - title "title:<&2>Walk" targets:<player>
+    - else if <player.vehicle.flag[speed]> == 2:
+        - adjust <player.vehicle> "speed:<def[speedVariable].as_decimal.mul[2]>"
+        - title "title:<&2>Trot" targets:<player>
+    - else if <player.vehicle.flag[speed]> == 3:
+        - adjust <player.vehicle> "speed:<def[speedVariable].as_decimal.mul[3]>"
+        - title "title:<&2>Canter" targets:<player>
+    - else if <player.vehicle.flag[speed]> == 4:
+        - adjust <player.vehicle> "speed:<def[speedVariable].as_decimal.mul[4]>"
+        - title "title:<&2>Gallop" targets:<player>
+    - else:
+        - adjust <player.vehicle> "speed:0"
+        - title "title:<&2>Halt" targets:<player>
+
+
+HorsesEvents:
+    type: world
+    debug: true
+    events:
+
+        # Horse Master Init #
+        on server preload:
+        - inject HorsesMasterInit
+        on reload scripts:
+        - inject HorsesMasterInit
+
+        # All Entity Mapping
+        on horse spawns:
+        - if !<yaml[horses].contains[entities.<context.entity>]>:
+            - define horse <context.entity>
+            - inject HorsesCreation
+        on horse damaged:
+        - if <yaml[horses].contains[entities.<context.entity>]>:
+            - if <yaml[horses].read[entities.<context.entity>.damage]> == true:
+                - inject HorsesDamaged
+        on horse breeds:
+        - define horse <context.child>
+        - inject HorsesCreation
+        on horse dies:
+        - if <yaml[horses].contains[entities.<context.entity>]>:
+            - inject HorsesRemoval
+        on player enters horse:
+        - inject HorsesRiderCheck
+        on player exits horse:
+        - inject HorsesExit
+        on player left clicks with HorseCrop:
+        # Check Player Riding Horse
+        - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+            - inject HorsesSpeedDecrease
+        on player right clicks with HorseCrop:
+        # Check Player Riding Horse
+        - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+            - inject HorsesSpeedIncrease
+
+HorsesClaim:
+    type: task
+    debug: false
+    script:
+    # Make The Player The Owner
+    - yaml id:horses set entities.<player.vehicle>.owner:<player>
+    # Check if Horse Has First Owner
+    - if <yaml[horses].read[entities.<player.vehicle>.firstowner]||null> == null:
+        - yaml id:horses set entities.<player.vehicle>.owner:<player>
+    # Give Horse Name
+    - yaml id:horses set entities.<player.vehicle>.name:<def[horseName]>
+    - adjust <player.vehicle> "custom_name:<def[horseName]>"
+    - adjust <player.vehicle> "custom_name_visible:<def[horseName]>"
+    # Save Horse
+    - yaml savefile:data/entities/horses.yml id:horses
+    # Notify Player
+    - narrate "<def[prefix]> You successfully claimed your new horse <&dq><def[horseName]><&dq>, congratulations!" targets:<player>
+HorsesUnClaim:
+    type: task
+    debug: false
+    script:
+    # Make Last Owner
+    - yaml id:horses set entities.<player.vehicle>.lastowner:<player>
+    # Remove as Owner
+    - yaml id:horses set entities.<player.vehicle>.owner:null
+    # Remove Horse Name
+    - yaml id:horses set entities.<player.vehicle>.name:null
+    - adjust <player.vehicle> "custom_name_visible:false"
+    - adjust <player.vehicle> "custom_name:Horse"
+    # Remove Current Trusted List
+    - yaml id:horses set entities.<player.vehicle>.trusted:li@
+    # Save Horse
+    - yaml savefile:data/entities/horses.yml id:horses
+    # Notify Player
+    - narrate "<def[prefix]> You successfully unclaimed your horse." targets:<player>
+    # Unmount from Horse
+    - mount cancel <player>
+
+HorsesTrust:
+    type: task
+    debug: false
+    script:
+    # Add Player to List of Trusted Players
+    - yaml id:horses set entities.<player.vehicle>.trusted:<yaml[horses].read[entities.<player.vehicle>.trusted].as_list.include[<def[player]>]>
+    # Save Horse
+    - yaml savefile:data/entities/horses.yml id:horses
+HorsesUntrust:
+    type: task
+    debug: false
+    script:
+    # Remove Player from List of Trusted Players
+    - yaml id:horses set entities.<player.vehicle>.trusted:<yaml[horses].read[entities.<player.vehicle>.trusted].as_list.exclude[<def[player]>]>
+    # Save Horse
+    - yaml savefile:data/entities/horses.yml id:horses
+
+HorsesRename:
+    type: task
+    debug: false
+    script:
+    # Update Name
+    - yaml id:horses set entities.<player.vehicle>.name:<context.args.get[2]>
+    - adjust <player.vehicle> "custom_name:<context.args.get[2]>"
+    - adjust <player.vehicle> "custom_name_visible:true"
+
+HorsesSetSpeed:
+    type: task
+    debug: false
+    script:
+    # Sets the speed of a horse
+    - yaml id:horses set entities.<player.vehicle>.speed:<def[speed].as_decimal>
+    - adjust <player.vehicle> "speed:<def[speed].as_decimal>"
+
+HorsesSetJump:
+    type: task
+    debug: false
+    script:
+    # Sets the jump strength of a horse
+    - yaml id:horses set entities.<player.vehicle>.jump_strength:<def[jump_strength].as_decimal>
+    - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
+
+HorsesCommand:
+    type: command
+    debug: true
+    name: horses
+    aliases:
+    - horse
+    script:
+    - define prefix "<&f>[<&6>Horses<&f>] <&7>"
+    - define permission_error "<def[prefix]> You do not have permission to use this command."
+    - if !<context.server>:
+        - if !<context.args.is_empty>:
+            - if <context.args.get[1]> == "CLAIM":
+                - if <player.has_permission[horses.claim]>:
+                    # Check if Player is Riding Horse
+                    - if <player.is_inside_vehicle>:
+                        - if <player.vehicle.entity_type||null> == HORSE:
+                            # Check if Horse is Tamed
+                            - if <player.vehicle.is_tamed>:
+                                # Check if Horse Already Owned
+                                - if <yaml[horses].read[entities.<player.vehicle>.owner]||null> == null:
+                                    # Check if Name Specified
+                                    - if <context.args.get[2]||null> != null:
+                                        - define horseName <context.args.get[2]>
+                                    - else:
+                                        - define horseName <yaml[horses].read[names].as_list.random>
+                                    - inject HorsesClaim
+                                # Horse Already Owned
+                                - else:
+                                    - narrate "<def[prefix]> This horse is already owned by another player." targets:<player>
+                            # Horse Not Tamed
+                            - else:
+                                - narrate "<def[prefix]> You must tame this horse before you can claim it." targets:<player>
+                        # Player Not Riding Horse
+                        - else:
+                            - narrate "<def[prefix]> You can only use this command on a horse." targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "UNCLAIM":
+                - if <player.has_permission[horses.unclaim]>:
+                    # Check if Player is Riding Horse
+                    - if <player.is_inside_vehicle>:
+                        - if <player.vehicle.entity_type||null> == HORSE:
+                            # Check if Horse Belongs to Player
+                            - if <yaml[horses].read[entities.<player.vehicle>.owner]> == <player>:
+                                - inject HorsesUnclaim
+                            # Horse Does Not Belong to Player
+                            - else:
+                                - narrate "<def[prefix]> This horse does not belong to you." targets:<player>
+                    # Player Not Riding Horse
+                        - else:
+                            - narrate "<def[prefix]> You can only use this command on a horse." targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "INFO":
+                # Check Player Has Permission
+                - if <player.has_permission[horses.info]>:
+                    # Check Player Riding Horse
+                    - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "RENAME":
+                - if <player.has_permission[horses.rename]>:
+                  # Check Player Riding Horse
+                	- if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                    # Check if Horse Belongs to Player
+                		- if <yaml[horses].read[entities.<player.vehicle>.owner]||null> == <player>:
+                      # Check if Horse Name Specified
+                			- if <context.args.get[2]||null> != null:
+                        # Rename Horse
+                				- inject HorsesRename
+                			- else:
+                				- narrate "<def[prefix]> You must specify a name for your horse to rename. Usage: /horse rename <&lt>name<&gt>" targets:<player>
+                		- else:
+                			- narrate "<def[prefix]> This horse does not belong to you." targets:<player>
+                	- else:
+                		- narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "LIST":
+                - if <player.has_permission[horses.list]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "FOALS":
+                - if <player.has_permission[horses.foals]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "HERE":
+                - if <player.has_permission[horses.here]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "GIVE":
+                - if <player.has_permission[horses.give]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "ACCEPT":
+                - if <player.has_permission[horses.accept]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "DENY":
+                - if <player.has_permission[horses.deny]>:
+
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "TRUST":
+                - if <player.has_permission[horses.trust]>:
+                    # Check Player Riding Horse
+                    - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                        # Check if Player Specified
+                        - if <context.args.get[2]||null> != null:
+                            # Check Player Exists
+                            - if <player[<context.args.get[2]>]||null> != null:
+                                - define player <player[<context.args.get[2]>]>
+                                # Trust Player to Horse
+                                - inject HorsesTrust
+                            - else:
+                                - narrate "<def[prefix]> The player you have specified does not exist, please check your spelling and try again." targets:<player>
+                        - else:
+                            - narrate "<def[prefix]> You must specify a player you want to trust to ride this horse. Usage: /horse trust <&lt>player<&gt>" targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "UNTRUST":
+                - if <player.has_permission[horses.untrust]>:
+                   # Check Player Riding Horse
+                    - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                        # Check if Player Specified
+                        - if <context.args.get[2]||null> != null:
+                            # Check Player Exists
+                            - if <player[<context.args.get[2]>]||null> != null:
+                                - define player <player[<context.args.get[2]>]>
+                                # Trust Player to Horse
+                                - inject HorsesUntrust
+                            - else:
+                                - narrate "<def[prefix]> The player you have specified does not exist, please check your spelling and try again." targets:<player>
+                        - else:
+                            - narrate "<def[prefix]> You must specify a player you want to trust to ride this horse. Usage: /horse trust <&lt>player<&gt>" targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "ADMIN":
+                - if <player.has_permission[horses.admin]>:
+                    - if <context.args.get[2]||null> == null:
+                        - narrate "<def[prefix]> You need to specify an administrative command to run." targets:<player>
+                    - else if <context.args.get[2]> == "SETJUMP":
+                        - if <player.has_permission[horses.admin.setjump]>:
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <context.args.get[3]||null> != null:
+                                    - if <context.args.get[3].is_decimal>:
+                                        - define jump_strength <context.args.get[3].as_decimal>
+                                        - inject HorsesSetJump
+                                    - else:
+                                        - narrate "<def[prefix]> The jump strength you have specified is not a valid number, please try again." targets:<player>
+                                - else:
+                                    - narrate "<def[prefix]> You must specify a number you want to set the jump strenth to. Usage: /horse admin setjump <&lt>jump_strength<&gt>" targets:<player>
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETSPEED":
+                        - if <player.has_permission[horses.admin.setspeed]>:
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <context.args.get[3]||null> != null:
+                                    - if <context.args.get[3].is_decimal>:
+                                        - define speed <context.args.get[3].as_decimal>
+                                        - inject HorsesSetSpeed
+                                    - else:
+                                        - narrate "<def[prefix]> The speed you have specified is not a valid number, please try again." targets:<player>
+                                - else:
+                                    - narrate "<def[prefix]> You must specify a number you want to set the speed to. Usage: /horse admin setspeed <&lt>speed<&gt>" targets:<player>
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETCOLOR":
+                        - if <player.has_permission[horses.admin.setcolor]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETMARKING":
+                        - if <player.has_permission[horses.admin.setmarking]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETGENDER":
+                        - if <player.has_permission[horses.admin.setgender]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETINJURY":
+                        - if <player.has_permission[horses.admin.setinjury]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "SETILLNESS":
+                        - if <player.has_permission[horses.admin.setillness]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[2]> == "HEAL":
+                        - if <player.has_permission[horses.admin.heal]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[1]> == "SETHUNGER":
+                        - if <player.has_permission[horses.admin.sethunger]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else if <context.args.get[1]> == "SETTHIRST":
+                        - if <player.has_permission[horses.admin.setthirst]>:
+
+                        - else:
+                            - narrate "<def[permission_error]>" targets:<player>
+                    - else:
+                        - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help." targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "DELETE":
+
+            - else:
+                - narrate "<def[prefix]> Unknown command. Type <&dq>/horses help<&dq> for help."
+        - else:
+            - narrate "<def[prefix]> No Argument Specified. Type <&dq>/horses help<&dq> for help."

@@ -327,6 +327,7 @@ HorsesUntrust:
     - narrate "<def[prefix]> You have now stopped <&dq><def[player].as_player.name><&dq> from being able to ride your horse." targets:<player>
     # Notify Trusted Player
     - narrate "<def[prefix]> You are no longer allowed to ride <&dq><player.vehicle.name><&dq>." targets:<def[player].as_player>
+
 HorsesRename:
     type: task
     debug: false
@@ -338,6 +339,16 @@ HorsesRename:
     # Notify Player
     - narrate "<def[prefix]> Your horse's name is now <&dq><context.args.get[2]><&dq>." targets:<player>
 
+HorsesSetJump:
+    type: task
+    debug: false
+    script:
+    # Sets the jump strength of a horse
+    - yaml id:horses set entities.<player.vehicle>.jump_strength:<def[jump_strength].as_decimal>
+    - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
+    # Notify Player
+    - narrate "<def[prefix]> You have now set this horse's jump strength to <&dq><def[jump_strength]><&dq>." targets:<player>
+
 HorsesSetSpeed:
     type: task
     debug: false
@@ -348,15 +359,14 @@ HorsesSetSpeed:
     # Notify Player
     - narrate "<def[prefix]> You have now set this horse's speed to <&dq><def[speed]><&dq>." targets:<player>
 
-HorsesSetJump:
+HorsesSetColor:
     type: task
     debug: false
     script:
-    # Sets the jump strength of a horse
-    - yaml id:horses set entities.<player.vehicle>.jump_strength:<def[jump_strength].as_decimal>
-    - adjust <player.vehicle> "jump_strength:<def[jump_strength].as_decimal>"
-    # Notify Player
-    - narrate "<def[prefix]> You have now set this horse's jump strength to <&dq><def[jump_strength]><&dq>." targets:<player>
+    # Sets the color of a horse
+    - yaml id:horses set entities.<player.vehicle>.color:<def[color]>
+    - define appearance li@<player.vehicle.color>
+    - adjust <player.vehicle> "color:<def[appearance].as_list.set[<def[color]>].at[1]>"
 
 HorsesDelete:
     type: task
@@ -563,7 +573,14 @@ HorsesCommand:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETCOLOR":
                         - if <player.has_permission[horses.admin.setcolor]>:
-
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <context.args.get[3]||null> != null:
+                                    - define color <context.args.get[3]>
+                                    - inject HorsesSetColor
+                                - else:
+                                    - narrate "<def[prefix]> You must specify a color you want to set. Usage: /horse admin setcolor <&lt>color<&gt>" targets:<player>
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETMARKING":

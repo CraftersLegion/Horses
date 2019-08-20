@@ -62,11 +62,17 @@ HorsesCreation:
     - yaml id:horses set entities.<def[horse]>.call_distance:16
     # Parents
     - if <context.father||null> != null:
-        - yaml id:horses set entities.<def[horse]>.father:<context.father>
+        - if <yaml[horses].read[entities.<context.father>.gender]> == MALE:
+            - yaml id:horses set entities.<def[horse]>.father:<context.father>
+        - else:
+            - yaml id:horses set entities.<def[horse]>.mother:<context.father>
     - else:
         - yaml id:horses set entities.<def[horse]>.father:null
     - if <context.mother||null> != null:
-        - yaml id:horses set entities.<def[horse]>.mother:<context.mother>
+        - if <yaml[horses].read[entities.<context.mother>.gender]> == FEMALE:
+            - yaml id:horses set entities.<def[horse]>.mother:<context.mother>
+        - else:
+            - yaml id:horses set entities.<def[horse]>.father:<context.mother>
     - else:
         - yaml id:horses set entities.<def[horse]>.mother:null
     # First Owner & Owner

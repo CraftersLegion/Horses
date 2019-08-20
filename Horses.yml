@@ -376,6 +376,13 @@ HorsesSetMarkings:
     - define appearance li@<player.vehicle.color>
     - adjust <player.vehicle> "color:<def[appearance].as_list.set[<def[markings]>].at[2]>"
 
+HorsesSetGender:
+    type: task
+    debug: false
+    script:
+    # Sets the gender of a horse
+    - yaml id:horses set entities.<player.vehicle>.gender:<def[gender]>
+
 HorsesDelete:
     type: task
     debug: false
@@ -605,7 +612,14 @@ HorsesCommand:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETGENDER":
                         - if <player.has_permission[horses.admin.setgender]>:
-
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <context.args.get[3]||null> != null:
+                                    - define gender <context.args.get[3]>
+                                    - inject HorsesSetGender
+                                - else:
+                                    - narrate "<def[prefix]> You must specify a markings you want to set. Usage: /horse admin setgender <&lt>gender<&gt>" targets:<player>
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETINJURY":

@@ -367,6 +367,14 @@ HorsesSetColor:
     - yaml id:horses set entities.<player.vehicle>.color:<def[color]>
     - define appearance li@<player.vehicle.color>
     - adjust <player.vehicle> "color:<def[appearance].as_list.set[<def[color]>].at[1]>"
+HorsesSetMarkings:
+    type: task
+    debug: false
+    script:
+    # Sets the marking of a horse
+    - yaml id:horses set entities.<player.vehicle>.markings:<def[markings]>
+    - define appearance li@<player.vehicle.color>
+    - adjust <player.vehicle> "color:<def[appearance].as_list.set[<def[markings]>].at[2]>"
 
 HorsesDelete:
     type: task
@@ -583,9 +591,16 @@ HorsesCommand:
                                 - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
-                    - else if <context.args.get[2]> == "SETMARKING":
-                        - if <player.has_permission[horses.admin.setmarking]>:
-
+                    - else if <context.args.get[2]> == "SETMARKINGS":
+                        - if <player.has_permission[horses.admin.setmarkings]>:
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <context.args.get[3]||null> != null:
+                                    - define markings <context.args.get[3]>
+                                    - inject HorsesSetMarkings
+                                - else:
+                                    - narrate "<def[prefix]> You must specify a markings you want to set. Usage: /horse admin setmarkings <&lt>markings<&gt>" targets:<player>
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETGENDER":

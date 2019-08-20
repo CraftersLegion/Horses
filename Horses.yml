@@ -397,6 +397,13 @@ HorsesHeal:
     - yaml id:horses set entities.<player.vehicle>.health:<def[health].as_decimal>
     - adjust <player.vehicle> "health:<def[health].as_decimal>"
 
+HorsesSetHunger:
+    type: task
+    debug: false
+    script:
+    # Sets the hunger of a horse
+    - yaml id:horses set entities.<player.vehicle>.hunger:<def[hunger].as_decimal>
+
 HorsesDelete:
     type: task
     debug: false
@@ -657,7 +664,20 @@ HorsesCommand:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[1]> == "SETHUNGER":
                         - if <player.has_permission[horses.admin.sethunger]>:
-
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - if <yaml[horses].read[entities.<player.vehicle>.hungerEnabled]>:
+                                    - if <context.args.get[3]||null> != null:
+                                        - if <context.args.get[3].is_decimal>:
+                                            - define hunger <context.args.get[3].as_decimal>
+                                            - inject HorsesSetHunger
+                                        - else:
+                                            - narrate "<def[prefix]> The hunger you have specified is not a valid number, please try again." targets:<player>
+                                    - else:
+                                        - narrate "<def[prefix]> You must specify a number you want to set the hunger to. Usage: /horses admin sethunger <&lt>hunger<&gt>" targets:<player>
+                                - else:
+                                    - narrate "<def[prefix]> This horse does not have hunger enabled." targets:<player>
+                            - else:
+                                - narrate "<def[riding_error]>"
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[1]> == "SETTHIRST":

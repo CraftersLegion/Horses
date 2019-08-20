@@ -383,6 +383,20 @@ HorsesSetGender:
     # Sets the gender of a horse
     - yaml id:horses set entities.<player.vehicle>.gender:<def[gender]>
 
+# implement injuries and illnesses later?
+# HorsesSetInjury:
+
+# HorsesSetIllness:
+
+HorsesHeal:
+    type: task
+    debug: false
+    script:
+    # Heals a horse
+    - define health <yaml[horses].read[entities.<player.vehicle>.max_health].as_decimal>
+    - yaml id:horses set entities.<player.vehicle>.health:<def[health].as_decimal>
+    - adjust <player.vehicle> "health:<def[health].as_decimal>"
+
 HorsesDelete:
     type: task
     debug: false
@@ -634,7 +648,10 @@ HorsesCommand:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "HEAL":
                         - if <player.has_permission[horses.admin.heal]>:
-
+                            - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                                - inject HorsesHeal
+                            - else:
+                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[1]> == "SETHUNGER":

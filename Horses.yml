@@ -422,6 +422,7 @@ HorsesCommand:
     script:
     - define prefix "<&f>[<&6>Horses<&f>] <&7>"
     - define permission_error "<def[prefix]> You do not have permission to use this command."
+    - define riding_error "<def[prefix]> You must be riding a horse to use this command."
     - if !<context.server>:
         - if !<context.args.is_empty>:
             - if <context.args.get[1]> == "CLAIM":
@@ -449,7 +450,7 @@ HorsesCommand:
                         - else:
                             - narrate "<def[prefix]> You can only use this command on a horse." targets:<player>
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "UNCLAIM":
@@ -467,7 +468,7 @@ HorsesCommand:
                         - else:
                             - narrate "<def[prefix]> You can only use this command on a horse." targets:<player>
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "INFO":
@@ -477,7 +478,7 @@ HorsesCommand:
                     - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
 
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "RENAME":
@@ -495,7 +496,7 @@ HorsesCommand:
                         - else:
                             - narrate "<def[prefix]> This horse does not belong to you." targets:<player>
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "LIST":
@@ -544,7 +545,7 @@ HorsesCommand:
                         - else:
                             - narrate "<def[prefix]> You must specify a player you want to trust to ride this horse. Usage: /horse trust <&lt>player<&gt>" targets:<player>
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "UNTRUST":
@@ -563,7 +564,7 @@ HorsesCommand:
                         - else:
                             - narrate "<def[prefix]> You must specify a player you want to trust to ride this horse. Usage: /horse trust <&lt>player<&gt>" targets:<player>
                     - else:
-                        - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                        - narrate "<def[riding_error]>" targets:<player>
                 - else:
                     - narrate "<def[permission_error]>" targets:<player>
             - else if <context.args.get[1]> == "ADMIN":
@@ -582,7 +583,7 @@ HorsesCommand:
                                 - else:
                                     - narrate "<def[prefix]> You must specify a number you want to set the jump strenth to. Usage: /horse admin setjump <&lt>jump_strength<&gt>" targets:<player>
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETSPEED":
@@ -597,7 +598,7 @@ HorsesCommand:
                                 - else:
                                     - narrate "<def[prefix]> You must specify a number you want to set the speed to. Usage: /horse admin setspeed <&lt>speed<&gt>" targets:<player>
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETCOLOR":
@@ -609,7 +610,7 @@ HorsesCommand:
                                 - else:
                                     - narrate "<def[prefix]> You must specify a color you want to set. Usage: /horse admin setcolor <&lt>color<&gt>" targets:<player>
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETMARKINGS":
@@ -621,7 +622,7 @@ HorsesCommand:
                                 - else:
                                     - narrate "<def[prefix]> You must specify a markings you want to set. Usage: /horse admin setmarkings <&lt>markings<&gt>" targets:<player>
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETGENDER":
@@ -633,7 +634,7 @@ HorsesCommand:
                                 - else:
                                     - narrate "<def[prefix]> You must specify a markings you want to set. Usage: /horse admin setgender <&lt>gender<&gt>" targets:<player>
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[2]> == "SETINJURY":
@@ -651,7 +652,7 @@ HorsesCommand:
                             - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
                                 - inject HorsesHeal
                             - else:
-                                - narrate "<def[prefix]> You must be riding a horse to use this command." targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate "<def[permission_error]>" targets:<player>
                     - else if <context.args.get[1]> == "SETHUNGER":
@@ -671,7 +672,7 @@ HorsesCommand:
                                 # Delete Horse
                                 - inject HorsesDelete
                             - else:
-                                - "<def[prefix]> You must be riding a horse to use that command." targets:<player>
+                                - "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate <def[permission_error]> targets:<player>
                     - else:

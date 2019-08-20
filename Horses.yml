@@ -676,7 +676,10 @@ HorsesCommand:
                                     - if <context.args.get[3]||null> != null:
                                         - if <context.args.get[3].is_decimal>:
                                             - define hunger <context.args.get[3].as_decimal>
-                                            - inject HorsesSetHunger
+                                            - if <def[hunger].as_decimal> < 0 || <def[thirst].as_decimal> > 100:
+                                                - narrate "<def[prefix]> The hunger must be from 0 to 100." targets:<player>
+                                            - else:
+                                                - inject HorsesSetHunger
                                         - else:
                                             - narrate "<def[prefix]> The hunger you have specified is not a valid number, please try again." targets:<player>
                                     - else:
@@ -694,7 +697,10 @@ HorsesCommand:
                                     - if <context.args.get[3]||null> != null:
                                         - if <context.args.get[3].is_decimal>:
                                             - define thirst <context.args.get[3].as_decimal>
-                                            - inject HorsesSetThirst
+                                            - if <def[thirst].as_decimal> < 0 || <def[thirst].as_decimal> > 100:
+                                                - narrate "<def[prefix]> The thirst must be from 0 to 100" targets:<player>
+                                            - else:
+                                                - inject HorsesSetThirst
                                         - else:
                                             - narrate "<def[prefix]> The thirst you have specified is not a valid number, please try again." targets:<player>
                                     - else:

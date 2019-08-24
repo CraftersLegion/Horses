@@ -724,7 +724,7 @@ HorsesCommand:
                                 # Delete Horse
                                 - inject HorsesDelete
                             - else:
-                                - "<def[riding_error]>" targets:<player>
+                                - narrate "<def[riding_error]>" targets:<player>
                         - else:
                             - narrate <def[permission_error]> targets:<player>
                     - else:

@@ -437,6 +437,8 @@ HorsesCommand:
     type: command
     debug: true
     name: horses
+    usage: "/horses help"
+    description: "All Horse Related Commands"
     aliases:
     - horse
     script:

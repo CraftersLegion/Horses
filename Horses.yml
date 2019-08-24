@@ -118,7 +118,7 @@ HorsesRiderCheck:
     - if <yaml[horses].contains[entities.<context.vehicle>]>:
         - if <yaml[horses].read[entities.<context.vehicle>.owner]||null> != <context.entity>:
             - if !<yaml[horses].read[entities.<context.vehicle>.trusted].as_list.contains[<context.entity>]||null> == true:
-                - if !<player.has_permission[horses.admin.ride]:
+                - if !<player.has_permission[horses.admin.ride]>:
                   - determine cancelled
 
     - inject HorsesEntry

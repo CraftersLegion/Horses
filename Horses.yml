@@ -266,6 +266,7 @@ HorsesEvents:
         - inject HorsesExit
         - flag player "infoCount:!"
         - flag player "viewHorseInfo:!"
+        - sidebar remove players:<player>
         on player left clicks with HorseCrop:
         # Usage Durability Change
         - adjust <context.item> "durability:<context.item.durability.sub[1]>"
@@ -281,10 +282,11 @@ HorsesEvents:
             
         # Info Loop
         on player steers entity:
-        - if <player.flag[infoCount]> < 20:
-            - flag player "infoCount:<player.flag[infoCount].add[1]>"
-        - else:
-            - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
+        - if <player.has_flag[viewHorseInfo]> && <player.flag[viewHorseInfo]||null> == true:
+            - if <player.flag[infoCount]> < 20:
+                - flag player "infoCount:<player.flag[infoCount].add[1]>"
+            - else:
+                - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
             
 HorsesClaim:
     type: task

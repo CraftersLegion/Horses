@@ -444,7 +444,7 @@ HorsesInfo:
     # Flag Player as Veiwing Info
     - flag player "viewHorseInfo:true"
     # Add Initial Sidebar
-    - sidebar "title:<&6>
+    - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
 
 HorsesCommand:
     type: command

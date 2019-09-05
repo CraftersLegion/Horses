@@ -260,8 +260,12 @@ HorsesEvents:
             - inject HorsesRemoval
         on player enters horse:
         - inject HorsesRiderCheck
+        # Info Variable
+        - flag player "infoCount:0"
         on player exits horse:
         - inject HorsesExit
+        - flag player "infoCount:!"
+        - flag player "viewHorseInfo:!"
         on player left clicks with HorseCrop:
         # Usage Durability Change
         - adjust <context.item> "durability:<context.item.durability.sub[1]>"
@@ -274,7 +278,14 @@ HorsesEvents:
         # Check Player Riding Horse
         - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
             - inject HorsesSpeedIncrease
-
+            
+        # Info Loop
+        on player steers entity:
+        - if <player.flag[infoCount]> < 20:
+            - flag player "infoCount:<player.flag[infoCount].add[1]>"
+        - else:
+            - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
+            
 HorsesClaim:
     type: task
     debug: false

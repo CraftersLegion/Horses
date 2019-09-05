@@ -618,7 +618,7 @@ HorsesCommand:
             - else if <context.args.get[1]> == "INFO":
                 - if <player.has_permission[horses.info]>:
                     - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
-                        - inject HorseInfo
+                        - inject HorsesInfo
                     - else:
                         - narrate "<def[riding_error]>" targets:<player>
                 - else:

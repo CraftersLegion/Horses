@@ -286,7 +286,7 @@ HorsesEvents:
             - if <player.flag[infoCount]> < 20:
                 - flag player "infoCount:<player.flag[infoCount].add[1]>"
             - else:
-                - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
+                - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>" players:<player>
             
 HorsesClaim:
     type: task
@@ -457,7 +457,7 @@ HorsesInfo:
     # Flag Player as Veiwing Info
     - flag player "viewHorseInfo:true"
     # Add Initial Sidebar
-    - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>"
+    - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger]>|<yaml[horses].read[entities.<player.vehicle>]>" players:<player>
 
 HorsesCommand:
     type: command

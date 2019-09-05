@@ -436,6 +436,15 @@ HorsesDelete:
     - narrate "<def[prefix]> You successfully deleted the horse." targets:<player>
     - if <player> != <def[owner]>:
         - narrate "<def[prefix]> Your horse <&dq><def[name]><&dq> has been permanently deleted." targets:<def[owner].as_player>
+        
+HorsesInfo:
+    type: task
+    debug: false
+    script:
+    # Flag Player as Veiwing Info
+    - flag player "viewHorseInfo:true"
+    # Add Initial Sidebar
+    - sidebar "title:<&6>
 
 HorsesCommand:
     type: command
@@ -589,6 +598,14 @@ HorsesCommand:
                                 - narrate "<def[prefix]> The player you have specified does not exist, please check your spelling and try again." targets:<player>
                         - else:
                             - narrate "<def[prefix]> You must specify a player you want to trust to ride this horse. Usage: /horse trust <&lt>player<&gt>" targets:<player>
+                    - else:
+                        - narrate "<def[riding_error]>" targets:<player>
+                - else:
+                    - narrate "<def[permission_error]>" targets:<player>
+            - else if <context.args.get[1]> == "INFO":
+                - if <player.has_permission[horses.info]>:
+                    - if <player.is_inside_vehicle> && <player.vehicle.entity_type||null> == HORSE:
+                        - inject HorseInfo
                     - else:
                         - narrate "<def[riding_error]>" targets:<player>
                 - else:

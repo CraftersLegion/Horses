@@ -191,7 +191,7 @@ HorsesExit:
 
 HorsesSpeedIncrease:
     type: task
-    debug: true
+    debug: false
     script:
     - if <player.vehicle.flag[speed]> < 4:
         - flag <player.vehicle> "speed:<player.vehicle.flag[speed].add[1]>"
@@ -228,7 +228,7 @@ HorsesSpeedEvaluate:
 
 HorsesEvents:
     type: world
-    debug: true
+    debug: false
     events:
 
         # Horse Master Init #
@@ -439,7 +439,7 @@ HorsesDelete:
 
 HorsesCommand:
     type: command
-    debug: true
+    debug: false
     name: horses
     usage: "/horses help"
     description: "All Horse Related Commands"

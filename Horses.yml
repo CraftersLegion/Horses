@@ -454,7 +454,7 @@ HorsesInfo:
     script:
     - while <player.has_flag[viewHorseInfo]> && <player.flag[viewHorseInfo]||null> == true:
         # Update Sidebar
-        - sidebar "title:<&6><player.vehicle.name>" "values:<&c><&l>Hunger:|<&3><&l>Thirst:" "scores:<yaml[horses].read[entities.<player.vehicle>.hunger].as_int>|<yaml[horses].read[entities.<player.vehicle>.thirst].as_int>" players:<player>
+        - sidebar "title:<&6><player.vehicle.name>" "values:<&4><&l>Health: <&f><yaml[horses].read[entities.<player.vehicle>.health].as_int>|<&c><&l>Hunger: <&f><yaml[horses].read[entities.<player.vehicle>.hunger].as_int>||<&3><&l>Thirst: <&f><yaml[horses].read[entities.<player.vehicle>.thirst].as_int>" "scores:4|3|2|1" players:<player>
         - wait 1s
 HorsesCommand:
     type: command
